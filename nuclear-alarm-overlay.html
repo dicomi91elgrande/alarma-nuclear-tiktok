@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alarma nuclear TikTok</title>
+  <style>
+    :root {
+      --alarm-red: 255, 0, 24;
+      --hot-red: 255, 42, 38;
+      --duration: 9000ms;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+    }
+
+    body.chroma {
+      background: #00ff00;
+    }
+
+    body.chroma .overlay {
+      background: #00ff00;
+    }
+
+    body {
+      pointer-events: none;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity 220ms ease;
+    }
+
+    .overlay.is-active {
+      opacity: 1;
+      animation: scenePulse 1.05s ease-in-out infinite;
+    }
+
+    .red-wash,
+    .heat-haze,
+    .scanlines,
+    .vignette,
+    .siren-beam,
+    .warning {
+      position: absolute;
+      inset: 0;
+    }
+
+    .red-wash {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(var(--hot-red), .28), transparent 42%),
+        linear-gradient(90deg, rgba(var(--alarm-red), .08), rgba(var(--alarm-red), .34), rgba(var(--alarm-red), .08));
+      mix-blend-mode: screen;
+      animation: redWash 1.05s ease-in-out infinite;
+    }
+
+    body.chroma .red-wash {
+      background:
+        repeating-linear-gradient(45deg, #ff0018 0 5px, transparent 5px 18px),
+        repeating-linear-gradient(-45deg, #ff0018 0 4px, transparent 4px 24px);
+      mix-blend-mode: normal;
+      opacity: 1;
+      animation: chromaRedWash 1.05s steps(2, end) infinite;
+    }
+
+    .heat-haze {
+      background:
+        repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .08) 0 2px, transparent 2px 13px),
+        radial-gradient(circle at 50% 48%, rgba(255, 255, 255, .22), transparent 23%);
+      filter: blur(12px);
+      mix-blend-mode: overlay;
+      opacity: .24;
+      animation: haze 2.2s linear infinite;
+    }
+
+    body.chroma .heat-haze {
+      display: none;
+    }
+
+    .scanlines {
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, .07) 0,
+        rgba(255, 255, 255, .07) 1px,
+        transparent 1px,
+        transparent 5px
+      );
+      mix-blend-mode: overlay;
+      opacity: .32;
+    }
+
+    body.chroma .scanlines {
+      background: repeating-linear-gradient(
+        0deg,
+        #ff0018 0,
+        #ff0018 2px,
+        transparent 2px,
+        transparent 18px
+      );
+      mix-blend-mode: normal;
+      opacity: 1;
+      animation: chromaScanPulse 1.05s steps(2, end) infinite;
+    }
+
+    .vignette {
+      box-shadow: inset 0 0 180px 80px rgba(150, 0, 0, .45);
+    }
+
+    body.chroma .vignette {
+      box-shadow:
+        inset 0 0 0 18px #ff0018,
+        inset 0 0 0 42px transparent,
+        inset 0 0 0 58px #ff0018;
+      opacity: 1;
+      animation: chromaVignettePulse 1.05s steps(2, end) infinite;
+    }
+
+    .siren-beam {
+      background:
+        conic-gradient(
+          from 0deg at 50% 50%,
+          transparent 0deg,
+          rgba(255, 0, 20, .04) 28deg,
+          rgba(255, 255, 255, .22) 42deg,
+          rgba(255, 0, 20, .1) 56deg,
+          transparent 88deg,
+          transparent 180deg,
+          rgba(255, 0, 20, .04) 208deg,
+          rgba(255, 255, 255, .2) 222deg,
+          rgba(255, 0, 20, .1) 236deg,
+          transparent 268deg,
+          transparent 360deg
+        );
+      mix-blend-mode: screen;
+      transform-origin: 50% 50%;
+      animation: rotateBeam 2.4s linear infinite;
+    }
+
+    body.chroma .siren-beam {
+      background:
+        conic-gradient(
+          from 0deg at 50% 50%,
+          transparent 0deg,
+          transparent 30deg,
+          #ff0018 30deg,
+          #ff0018 54deg,
+          transparent 54deg,
+          transparent 180deg,
+          transparent 210deg,
+          #ff0018 210deg,
+          #ff0018 234deg,
+          transparent 234deg,
+          transparent 360deg
+        );
+      mix-blend-mode: normal;
+      opacity: 1;
+    }
+
+    .warning {
+      display: grid;
+      place-items: center;
+      padding: 5vw;
+      text-align: center;
+      color: white;
+      text-shadow:
+        0 0 10px rgba(255, 0, 0, .95),
+        0 0 28px rgba(255, 0, 0, .9),
+        4px 4px 0 rgba(0, 0, 0, .72);
+      opacity: .86;
+      animation: warningKick .7s steps(2, end) infinite;
+    }
+
+    .warning-inner {
+      max-width: min(980px, 92vw);
+      transform: rotate(-1deg);
+    }
+
+    .symbol {
+      display: block;
+      margin: 0 auto;
+      width: clamp(96px, 15vw, 180px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: clamp(7px, 1vw, 12px) solid #fff;
+      background:
+        conic-gradient(
+          #fff 0deg 40deg,
+          transparent 40deg 80deg,
+          #fff 80deg 160deg,
+          transparent 160deg 200deg,
+          #fff 200deg 280deg,
+          transparent 280deg 320deg,
+          #fff 320deg 360deg
+        );
+      filter: drop-shadow(0 0 26px rgba(255, 0, 0, .98));
+      animation: symbolThrob 1.05s ease-in-out infinite;
+    }
+
+    .symbol::after {
+      content: "";
+      display: block;
+      width: 28%;
+      aspect-ratio: 1;
+      margin: 36%;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    body.chroma .symbol {
+      border-color: #ff0018;
+      background:
+        conic-gradient(
+          #ff0018 0deg 40deg,
+          transparent 40deg 80deg,
+          #ff0018 80deg 160deg,
+          transparent 160deg 200deg,
+          #ff0018 200deg 280deg,
+          transparent 280deg 320deg,
+          #ff0018 320deg 360deg
+        );
+      filter: none;
+    }
+
+    body.chroma .symbol::after {
+      background: #ff0018;
+    }
+
+    .test-panel {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      display: none;
+      gap: 8px;
+      pointer-events: auto;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .test-panel.is-visible {
+      display: flex;
+    }
+
+    .test-panel button {
+      border: 1px solid rgba(255, 255, 255, .4);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: white;
+      background: rgba(150, 0, 0, .82);
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, .3);
+    }
+
+    @keyframes scenePulse {
+      0%, 100% {
+        filter: saturate(1.1) brightness(.95);
+      }
+      50% {
+        filter: saturate(2.5) brightness(1.35);
+      }
+    }
+
+    @keyframes redWash {
+      0%, 100% {
+        opacity: .22;
+      }
+      50% {
+        opacity: .62;
+      }
+    }
+
+    @keyframes chromaRedWash {
+      0%, 100% {
+        background-size: 26px 26px, 36px 36px;
+      }
+      50% {
+        background-size: 18px 18px, 26px 26px;
+      }
+    }
+
+    @keyframes chromaScanPulse {
+      0%, 100% {
+        background-size: 100% 22px;
+      }
+      50% {
+        background-size: 100% 12px;
+      }
+    }
+
+    @keyframes chromaVignettePulse {
+      0%, 100% {
+        box-shadow:
+          inset 0 0 0 12px #ff0018,
+          inset 0 0 0 42px transparent,
+          inset 0 0 0 54px #ff0018;
+      }
+      50% {
+        box-shadow:
+          inset 0 0 0 28px #ff0018,
+          inset 0 0 0 58px transparent,
+          inset 0 0 0 78px #ff0018;
+      }
+    }
+
+    @keyframes haze {
+      from {
+        transform: scale(1.05) rotate(0deg);
+      }
+      to {
+        transform: scale(1.12) rotate(360deg);
+      }
+    }
+
+    @keyframes rotateBeam {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes warningKick {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      50% {
+        transform: translate3d(1px, -1px, 0) scale(1.015);
+      }
+    }
+
+    @keyframes symbolThrob {
+      0%, 100% {
+        transform: scale(.96);
+      }
+      50% {
+        transform: scale(1.08);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="overlay" id="overlay" aria-hidden="true">
+    <div class="red-wash"></div>
+    <div class="siren-beam"></div>
+    <div class="heat-haze"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <div class="warning">
+      <div class="warning-inner">
+        <span class="symbol" aria-hidden="true"></span>
+      </div>
+    </div>
+  </main>
+
+  <div class="test-panel" id="testPanel">
+    <button type="button" id="testButton">Probar alarma</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const overlay = document.getElementById("overlay");
+    const testPanel = document.getElementById("testPanel");
+    const testButton = document.getElementById("testButton");
+
+    const minCoins = Number(params.get("min") || 500);
+    const duration = Number(params.get("duration") || 9000);
+    const demo = params.get("demo") === "1";
+    const chroma = params.get("chroma") === "1";
+    let alarmTimer = null;
+
+    document.documentElement.style.setProperty("--duration", `${duration}ms`);
+
+    if (chroma) {
+      document.body.classList.add("chroma");
+    }
+
+    function triggerNuclearAlarm(payload = {}) {
+      const coins = Number(payload.coins || payload.value || payload.amount || minCoins);
+      if (coins < minCoins) return;
+
+      clearTimeout(alarmTimer);
+      overlay.classList.add("is-active");
+      overlay.setAttribute("aria-hidden", "false");
+
+      alarmTimer = setTimeout(() => {
+        overlay.classList.remove("is-active");
+        overlay.setAttribute("aria-hidden", "true");
+      }, duration);
+    }
+
+    window.triggerNuclearAlarm = triggerNuclearAlarm;
+
+    window.addEventListener("message", (event) => {
+      const data = event.data || {};
+      if (data.type === "gift" || data.type === "tiktok-gift" || data.type === "nuclear-alarm") {
+        triggerNuclearAlarm(data);
+      }
+    });
+
+    window.addEventListener("gift", (event) => {
+      triggerNuclearAlarm(event.detail || {});
+    });
+
+    testButton.addEventListener("click", () => {
+      triggerNuclearAlarm({ user: "Modo prueba", coins: minCoins });
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.code === "Space") {
+        triggerNuclearAlarm({ user: "Modo prueba", coins: minCoins });
+      }
+    });
+
+    if (demo) {
+      testPanel.classList.add("is-visible");
+      setTimeout(() => triggerNuclearAlarm({ user: "Modo prueba", coins: minCoins }), 700);
+    }
+  </script>
+</body>
+</html>
