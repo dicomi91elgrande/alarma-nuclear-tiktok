@@ -13,17 +13,21 @@
     .idle, .roulette, .active { position: absolute; display: grid; place-items: center; opacity: 0; transform: scale(.84); transition: opacity .25s ease, transform .25s ease; }
     .idle.is-visible, .roulette.is-visible, .active.is-visible { opacity: 1; transform: scale(1); }
     .idle { gap: 14px; text-align: center; }
-    .monkey { width: clamp(180px, 31vw, 390px); max-height: 42vh; object-fit: contain; filter: drop-shadow(0 0 4px #111) drop-shadow(0 12px 0 #151515); }
+    .monkey { width: clamp(210px, 36vw, 470px); max-height: 48vh; object-fit: contain; filter: drop-shadow(0 0 5px #111) drop-shadow(0 14px 0 #151515); }
     .idle strong { padding: 10px 18px; background: #ffed00; color: #121212; border: 5px solid #121212; font-family: Arial, Helvetica, sans-serif; font-size: clamp(22px, 3.2vw, 52px); font-weight: 1000; text-transform: uppercase; }
-    .roulette { width: min(76vw, 760px); height: min(76vw, 760px); max-height: 76vh; aspect-ratio: 1; border: 14px solid #111; border-radius: 50%; overflow: hidden; background: conic-gradient(#ffed00 0 72deg, #ff3b30 72deg 144deg, #14d97b 144deg 216deg, #00a8ff 216deg 288deg, #ff7a00 288deg); box-shadow: 0 0 0 9px white, 0 18px 0 #111; }
-    .roulette::before { content: ""; position: absolute; top: -3px; left: 50%; z-index: 3; transform: translateX(-50%); border-left: 28px solid transparent; border-right: 28px solid transparent; border-top: 58px solid #111; }
-    .roulette-values { position: absolute; inset: 0; animation: spin .12s linear infinite; }
-    .roulette-values span { position: absolute; left: 50%; top: 50%; font-size: clamp(42px, 8vw, 92px); color: white; -webkit-text-stroke: 5px #111; text-shadow: 0 7px 0 #111; }
-    .roulette-values span:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateY(-30vh) rotate(0deg); }
-    .roulette-values span:nth-child(2) { transform: translate(-50%, -50%) rotate(72deg) translateY(-30vh) rotate(-72deg); }
-    .roulette-values span:nth-child(3) { transform: translate(-50%, -50%) rotate(144deg) translateY(-30vh) rotate(-144deg); }
-    .roulette-values span:nth-child(4) { transform: translate(-50%, -50%) rotate(216deg) translateY(-30vh) rotate(-216deg); }
-    .roulette-values span:nth-child(5) { transform: translate(-50%, -50%) rotate(288deg) translateY(-30vh) rotate(-288deg); }
+    .roulette { width: min(70vw, 70vh, 720px); aspect-ratio: 1; border-radius: 50%; background: repeating-conic-gradient(from -3deg, #fff4a8 0 3deg, #b36b00 3deg 6deg); box-shadow: 0 18px 0 #261300, 0 24px 28px rgba(0,0,0,.65), inset 0 0 0 5px #fff2a0; }
+    .roulette::before { content: ""; position: absolute; inset: 7%; z-index: 1; border: 9px solid #331400; border-radius: 50%; background: conic-gradient(from -36deg, #ffd21a 0 72deg, #d71920 72deg 144deg, #fff7dc 144deg 216deg, #ff7a00 216deg 288deg, #8f0018 288deg 360deg); box-shadow: inset 0 0 28px rgba(0,0,0,.55), 0 0 0 5px #fff7c7; }
+    .roulette::after { content: ""; position: absolute; top: -7%; left: 50%; z-index: 8; width: 13%; height: 20%; transform: translateX(-50%); clip-path: polygon(50% 100%, 0 0, 100% 0); background: linear-gradient(90deg, #8f0018, #ff3a30 48%, #8f0018 52%); filter: drop-shadow(0 6px 0 #240900); }
+    .roulette-wheel { position: absolute; inset: 7%; z-index: 2; border-radius: 50%; animation: spin .12s linear infinite; }
+    .roulette-values { position: absolute; inset: 0; }
+    .roulette-values::before { content: ""; position: absolute; inset: 39%; z-index: 3; border: 7px solid #2a1200; border-radius: 50%; background: radial-gradient(circle at 38% 32%, #fff8aa 0 8%, #ffc400 9% 42%, #9f3a00 75%); box-shadow: 0 7px 0 #2a1200, 0 0 0 5px #fff3b0; }
+    .roulette-values span { position: absolute; left: 50%; top: 50%; z-index: 2; width: 25%; text-align: center; font-size: clamp(30px, 5.5vw, 72px); line-height: 1; color: white; -webkit-text-stroke: 4px #160900; text-shadow: 0 5px 0 #160900; }
+    .roulette-values span:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateY(-32cqw) rotate(0deg); }
+    .roulette-values span:nth-child(2) { transform: translate(-50%, -50%) rotate(72deg) translateY(-32cqw) rotate(-72deg); }
+    .roulette-values span:nth-child(3) { transform: translate(-50%, -50%) rotate(144deg) translateY(-32cqw) rotate(-144deg); }
+    .roulette-values span:nth-child(4) { transform: translate(-50%, -50%) rotate(216deg) translateY(-32cqw) rotate(-216deg); }
+    .roulette-values span:nth-child(5) { transform: translate(-50%, -50%) rotate(288deg) translateY(-32cqw) rotate(-288deg); }
+    .roulette-wheel { container-type: inline-size; }
     .active { gap: 4px; text-align: center; }
     .result { font-size: clamp(150px, 34vw, 500px); line-height: .8; color: #ffed00; -webkit-text-stroke: clamp(6px, 1vw, 15px) #111; text-shadow: 0 18px 0 #e22822; animation: pop 1s ease-in-out infinite; }
     .timer { min-width: 5ch; padding: 7px 20px; color: white; background: #111; border: 6px solid white; font: 900 clamp(34px, 6vw, 78px)/1 Arial, sans-serif; }
@@ -35,7 +39,7 @@
     .test-button.is-visible { display: block; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes pop { 50% { transform: scale(1.08); } }
-    @media (max-height: 600px) { .monkey { max-height: 34vh; } .roulette { max-height: 68vh; } }
+    @media (max-height: 600px) { .monkey { max-height: 38vh; } .roulette { width: min(62vw, 68vh, 620px); } }
   </style>
 </head>
 <body>
@@ -44,8 +48,8 @@
     <a href="multiplier-overlay.html?demo=1&chroma=1" aria-current="page">2</a>
   </nav>
   <main class="stage">
-    <section class="idle is-visible" id="idle"><img class="monkey" src="backing-monkey.png" alt=""><strong>Activas Multiplicador</strong></section>
-    <section class="roulette" id="roulette"><div class="roulette-values"><span>X1</span><span>X2</span><span>X5</span><span>X10</span><span>X100</span></div></section>
+    <section class="idle is-visible" id="idle"><img class="monkey" src="backing-monkey-hd.png" alt=""><strong>Activas Multiplicador</strong></section>
+    <section class="roulette" id="roulette"><div class="roulette-wheel"><div class="roulette-values"><span>X1</span><span>X2</span><span>X5</span><span>X10</span><span>X100</span></div></div></section>
     <section class="active" id="active"><div class="result" id="result">X1</div><div class="timer" id="timer">01:00</div></section>
   </main>
   <button class="test-button" id="testButton" type="button">Probar multiplicador</button>
