@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multiplicador TikTok</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: transparent; color: white; font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; pointer-events: none; }
+    body.chroma { background: #00ff00; }
+    .stage { position: fixed; inset: 0; display: grid; place-items: center; }
+    .idle, .roulette, .active { position: absolute; display: grid; place-items: center; opacity: 0; transform: scale(.84); transition: opacity .25s ease, transform .25s ease; }
+    .idle.is-visible, .roulette.is-visible, .active.is-visible { opacity: 1; transform: scale(1); }
+    .idle { gap: 14px; text-align: center; }
+    .monkey { width: clamp(180px, 31vw, 390px); max-height: 42vh; object-fit: contain; filter: drop-shadow(0 0 4px #111) drop-shadow(0 12px 0 #151515); }
+    .idle strong { padding: 10px 18px; background: #ffed00; color: #121212; border: 5px solid #121212; font-family: Arial, Helvetica, sans-serif; font-size: clamp(22px, 3.2vw, 52px); font-weight: 1000; text-transform: uppercase; }
+    .roulette { width: min(76vw, 760px); height: min(76vw, 760px); max-height: 76vh; aspect-ratio: 1; border: 14px solid #111; border-radius: 50%; overflow: hidden; background: conic-gradient(#ffed00 0 72deg, #ff3b30 72deg 144deg, #14d97b 144deg 216deg, #00a8ff 216deg 288deg, #ff7a00 288deg); box-shadow: 0 0 0 9px white, 0 18px 0 #111; }
+    .roulette::before { content: ""; position: absolute; top: -3px; left: 50%; z-index: 3; transform: translateX(-50%); border-left: 28px solid transparent; border-right: 28px solid transparent; border-top: 58px solid #111; }
+    .roulette-values { position: absolute; inset: 0; animation: spin .12s linear infinite; }
+    .roulette-values span { position: absolute; left: 50%; top: 50%; font-size: clamp(42px, 8vw, 92px); color: white; -webkit-text-stroke: 5px #111; text-shadow: 0 7px 0 #111; }
+    .roulette-values span:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateY(-30vh) rotate(0deg); }
+    .roulette-values span:nth-child(2) { transform: translate(-50%, -50%) rotate(72deg) translateY(-30vh) rotate(-72deg); }
+    .roulette-values span:nth-child(3) { transform: translate(-50%, -50%) rotate(144deg) translateY(-30vh) rotate(-144deg); }
+    .roulette-values span:nth-child(4) { transform: translate(-50%, -50%) rotate(216deg) translateY(-30vh) rotate(-216deg); }
+    .roulette-values span:nth-child(5) { transform: translate(-50%, -50%) rotate(288deg) translateY(-30vh) rotate(-288deg); }
+    .active { gap: 4px; text-align: center; }
+    .result { font-size: clamp(150px, 34vw, 500px); line-height: .8; color: #ffed00; -webkit-text-stroke: clamp(6px, 1vw, 15px) #111; text-shadow: 0 18px 0 #e22822; animation: pop 1s ease-in-out infinite; }
+    .timer { min-width: 5ch; padding: 7px 20px; color: white; background: #111; border: 6px solid white; font: 900 clamp(34px, 6vw, 78px)/1 Arial, sans-serif; }
+    .page-nav { position: fixed; top: 16px; left: 16px; z-index: 20; display: none; gap: 8px; pointer-events: auto; font-family: Arial, sans-serif; }
+    .page-nav.is-visible { display: flex; }
+    .page-nav a { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid rgba(255,255,255,.55); border-radius: 8px; color: white; background: rgba(20,20,24,.9); font-weight: 900; text-decoration: none; }
+    .page-nav a[aria-current="page"] { background: #c8001e; }
+    .test-button { position: fixed; right: 16px; bottom: 16px; z-index: 20; display: none; padding: 11px 16px; border: 1px solid white; border-radius: 8px; color: white; background: #c8001e; font-weight: 900; pointer-events: auto; cursor: pointer; }
+    .test-button.is-visible { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pop { 50% { transform: scale(1.08); } }
+    @media (max-height: 600px) { .monkey { max-height: 34vh; } .roulette { max-height: 68vh; } }
+  </style>
+</head>
+<body>
+  <nav class="page-nav" id="pageNav" aria-label="Overlays de prueba">
+    <a href="nuclear-alarm-overlay.html?demo=1&chroma=1">1</a>
+    <a href="multiplier-overlay.html?demo=1&chroma=1" aria-current="page">2</a>
+  </nav>
+  <main class="stage">
+    <section class="idle is-visible" id="idle"><img class="monkey" src="backing-monkey.png" alt=""><strong>Activas Multiplicador</strong></section>
+    <section class="roulette" id="roulette"><div class="roulette-values"><span>X1</span><span>X2</span><span>X5</span><span>X10</span><span>X100</span></div></section>
+    <section class="active" id="active"><div class="result" id="result">X1</div><div class="timer" id="timer">01:00</div></section>
+  </main>
+  <button class="test-button" id="testButton" type="button">Probar multiplicador</button>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const demo = params.get("demo") === "1";
+    const duration = Number(params.get("duration") || 60000);
+    const options = [1, 2, 5, 10, 100];
+    const idle = document.getElementById("idle");
+    const roulette = document.getElementById("roulette");
+    const active = document.getElementById("active");
+    const result = document.getElementById("result");
+    const timer = document.getElementById("timer");
+    let finishTimer = null;
+    let ticker = null;
+
+    if (params.get("chroma") === "1") document.body.classList.add("chroma");
+    if (demo) {
+      document.getElementById("pageNav").classList.add("is-visible");
+      document.getElementById("testButton").classList.add("is-visible");
+    }
+
+    function show(view) {
+      [idle, roulette, active].forEach((item) => item.classList.toggle("is-visible", item === view));
+    }
+
+    function resetMultiplier() {
+      clearTimeout(finishTimer);
+      clearInterval(ticker);
+      window.currentMultiplier = 1;
+      show(idle);
+    }
+
+    function triggerMultiplier() {
+      clearTimeout(finishTimer);
+      clearInterval(ticker);
+      show(roulette);
+      setTimeout(() => {
+        const multiplier = options[Math.floor(Math.random() * options.length)];
+        const endsAt = Date.now() + duration;
+        window.currentMultiplier = multiplier;
+        result.textContent = `X${multiplier}`;
+        show(active);
+        const updateTimer = () => {
+          const seconds = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+          const minutes = Math.floor(seconds / 60);
+          const remainder = seconds % 60;
+          timer.textContent = `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+        };
+        updateTimer();
+        ticker = setInterval(updateTimer, 250);
+        finishTimer = setTimeout(resetMultiplier, duration);
+      }, 2600);
+    }
+
+    window.triggerMultiplier = triggerMultiplier;
+    window.addEventListener("message", (event) => {
+      const data = event.data || {};
+      if (data.type === "multiplier-gift" || data.type === "backing-monkey") triggerMultiplier(data);
+    });
+    window.addEventListener("multiplier-gift", triggerMultiplier);
+    document.getElementById("testButton").addEventListener("click", triggerMultiplier);
+    window.addEventListener("keydown", (event) => { if (event.code === "Space") triggerMultiplier(); });
+  </script>
+</body>
+</html>
