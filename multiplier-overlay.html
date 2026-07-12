@@ -58,6 +58,7 @@
     const demo = params.get("demo") === "1";
     const duration = Number(params.get("duration") || 60000);
     const cycleDuration = Number(params.get("cycle") || 300000);
+    const holdDuration = Number(params.get("hold") || 10000);
     const options = [1, 2, 5, 10, 100];
     const idle = document.getElementById("idle");
     const roulette = document.getElementById("roulette");
@@ -117,7 +118,11 @@
         };
         updateTimer();
         ticker = setInterval(updateTimer, 250);
-        finishTimer = setTimeout(startWaitingCycle, duration);
+        finishTimer = setTimeout(() => {
+          clearInterval(ticker);
+          timer.textContent = "00:00";
+          finishTimer = setTimeout(startWaitingCycle, holdDuration);
+        }, duration);
       }, 2600);
     }
 
