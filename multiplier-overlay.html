@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Multiplicador TikTok</title>
   <style>
+    :root { --spin-duration: 3600ms; }
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
     body { background: transparent; color: white; font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif; pointer-events: none; }
@@ -16,12 +17,16 @@
     .idle strong { padding: 10px 18px; background: #ffed00; color: #121212; border: 5px solid #121212; font-family: Arial, Helvetica, sans-serif; font-size: clamp(22px, 3.2vw, 52px); font-weight: 1000; text-transform: uppercase; }
     .idle-timer { z-index: 2; min-width: 5ch; margin-bottom: 0; padding: 7px 20px; color: white; background: #111; border: 6px solid white; font: 900 clamp(34px, 6vw, 78px)/1 Arial, sans-serif; box-shadow: 0 5px 0 #c8171d; }
     .roulette { width: min(70vw, 70vh, 720px); aspect-ratio: 1; border-radius: 50%; background: repeating-conic-gradient(from -3deg, #fff4a8 0 3deg, #b36b00 3deg 6deg); box-shadow: 0 18px 0 #261300, 0 24px 28px rgba(0,0,0,.65), inset 0 0 0 5px #fff2a0; }
-    .roulette::before { content: ""; position: absolute; inset: 7%; z-index: 1; border: 9px solid #331400; border-radius: 50%; background: conic-gradient(from -36deg, #ffd21a 0 72deg, #d71920 72deg 144deg, #fff7dc 144deg 216deg, #ff7a00 216deg 288deg, #8f0018 288deg 360deg); box-shadow: inset 0 0 28px rgba(0,0,0,.55), 0 0 0 5px #fff7c7; }
+    .roulette::before { content: ""; position: absolute; inset: 4%; z-index: 1; border: 5px solid #331400; border-radius: 50%; box-shadow: inset 0 0 0 4px #fff7c7, inset 0 0 24px rgba(0,0,0,.45); }
     .roulette::after { content: ""; position: absolute; top: -7%; left: 50%; z-index: 8; width: 13%; height: 20%; transform: translateX(-50%); clip-path: polygon(50% 100%, 0 0, 100% 0); background: linear-gradient(90deg, #8f0018, #ff3a30 48%, #8f0018 52%); filter: drop-shadow(0 6px 0 #240900); }
-    .roulette-wheel { position: absolute; inset: 7%; z-index: 2; border-radius: 50%; animation: spin .12s linear infinite; }
+    .roulette-wheel { position: absolute; inset: 7%; z-index: 2; overflow: hidden; border: 9px solid #331400; border-radius: 50%; background: conic-gradient(from -36deg, #ffd21a 0 72deg, #d71920 72deg 144deg, #fff7dc 144deg 216deg, #ff7a00 216deg 288deg, #8f0018 288deg 360deg); box-shadow: inset 0 0 28px rgba(0,0,0,.55), 0 0 0 5px #fff7c7; }
+    .roulette.is-visible .roulette-wheel { animation: wheelSpin var(--spin-duration) cubic-bezier(.08, .66, .12, 1) both; }
+    .roulette.is-visible::after { animation: pointerTick .16s ease-in-out 18 alternate; }
     .roulette-values { position: absolute; inset: 0; }
     .roulette-values::before { content: ""; position: absolute; inset: 39%; z-index: 3; border: 7px solid #2a1200; border-radius: 50%; background: radial-gradient(circle at 38% 32%, #fff8aa 0 8%, #ffc400 9% 42%, #9f3a00 75%); box-shadow: 0 7px 0 #2a1200, 0 0 0 5px #fff3b0; }
     .roulette-values span { position: absolute; left: 50%; top: 50%; z-index: 2; width: 25%; text-align: center; font-size: clamp(30px, 5.5vw, 72px); line-height: 1; color: white; -webkit-text-stroke: 4px #160900; text-shadow: 0 5px 0 #160900; }
+    .roulette-values span b { display: block; font-weight: inherit; }
+    .roulette.is-visible .roulette-values span b { animation: keepUpright var(--spin-duration) cubic-bezier(.08, .66, .12, 1) both; }
     .roulette-values span:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateY(-32cqw) rotate(0deg); }
     .roulette-values span:nth-child(2) { transform: translate(-50%, -50%) rotate(72deg) translateY(-32cqw) rotate(-72deg); }
     .roulette-values span:nth-child(3) { transform: translate(-50%, -50%) rotate(144deg) translateY(-32cqw) rotate(-144deg); }
@@ -37,7 +42,15 @@
     .page-nav a[aria-current="page"] { background: #c8001e; }
     .test-button { position: fixed; right: 16px; bottom: 16px; z-index: 20; display: none; padding: 11px 16px; border: 1px solid white; border-radius: 8px; color: white; background: #c8001e; font-weight: 900; pointer-events: auto; cursor: pointer; }
     .test-button.is-visible { display: block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes wheelSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(var(--wheel-end, 1800deg)); }
+    }
+    @keyframes keepUpright {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(calc(var(--wheel-end, 1800deg) * -1)); }
+    }
+    @keyframes pointerTick { to { transform: translateX(-50%) rotate(5deg); } }
     @keyframes pop { 50% { transform: scale(1.08); } }
     @media (max-height: 600px) { .roulette { width: min(62vw, 68vh, 620px); } }
   </style>
@@ -49,8 +62,8 @@
   </nav>
   <main class="stage">
     <section class="idle is-visible" id="idle"><div class="idle-timer" id="idleTimer">05:00</div><strong>Se Activa Multiplicador</strong></section>
-    <section class="roulette" id="roulette"><div class="roulette-wheel"><div class="roulette-values"><span>X1</span><span>X2</span><span>X5</span><span>X10</span><span>X100</span></div></div></section>
-    <section class="active" id="active"><div class="result" id="result">X1</div><div class="timer" id="timer">01:00</div></section>
+    <section class="roulette" id="roulette"><div class="roulette-wheel"><div class="roulette-values"><span><b>X2</b></span><span><b>X5</b></span><span><b>X10</b></span><span><b>X50</b></span><span><b>X100</b></span></div></div></section>
+    <section class="active" id="active"><div class="result" id="result">X2</div><div class="timer" id="timer">01:00</div></section>
   </main>
   <button class="test-button" id="testButton" type="button">Probar multiplicador</button>
   <script>
@@ -59,7 +72,8 @@
     const duration = Number(params.get("duration") || 60000);
     const cycleDuration = Number(params.get("cycle") || 300000);
     const holdDuration = Number(params.get("hold") || 10000);
-    const options = [1, 2, 5, 10, 100];
+    const spinDuration = Number(params.get("spin") || 3600);
+    const options = [2, 5, 10, 50, 100];
     const idle = document.getElementById("idle");
     const roulette = document.getElementById("roulette");
     const active = document.getElementById("active");
@@ -69,6 +83,8 @@
     let finishTimer = null;
     let ticker = null;
     let rouletteTimer = null;
+
+    document.documentElement.style.setProperty("--spin-duration", `${spinDuration}ms`);
 
     if (params.get("chroma") === "1") document.body.classList.add("chroma");
     if (demo) {
@@ -106,9 +122,13 @@
 
     function triggerMultiplier() {
       clearTimers();
+      const multiplierIndex = Math.floor(Math.random() * options.length);
+      const multiplier = options[multiplierIndex];
+      roulette.style.setProperty("--wheel-end", `${1800 - (multiplierIndex * 72)}deg`);
+      show(idle);
+      void roulette.offsetWidth;
       show(roulette);
       rouletteTimer = setTimeout(() => {
-        const multiplier = options[Math.floor(Math.random() * options.length)];
         const endsAt = Date.now() + duration;
         window.currentMultiplier = multiplier;
         result.textContent = `X${multiplier}`;
@@ -123,7 +143,7 @@
           timer.textContent = "00:00";
           finishTimer = setTimeout(startWaitingCycle, holdDuration);
         }, duration);
-      }, 2600);
+      }, spinDuration);
     }
 
     window.triggerMultiplier = triggerMultiplier;
