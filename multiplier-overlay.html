@@ -15,7 +15,13 @@
     .idle.is-visible, .roulette.is-visible, .active.is-visible { opacity: 1; transform: scale(1); }
     .idle { gap: 0; text-align: center; }
     .idle strong { padding: 8px 14px; background: #ffed00; color: #121212; border: 4px solid #121212; font-family: Arial, Helvetica, sans-serif; font-size: clamp(18px, 2.56vw, 42px); font-weight: 1000; text-transform: uppercase; }
-    .idle-timer { z-index: 2; min-width: 5ch; margin-bottom: 0; padding: 7px 20px; color: white; background: #111; border: 6px solid white; font: 900 clamp(34px, 6vw, 78px)/1 Arial, sans-serif; box-shadow: 0 5px 0 #c8171d; }
+    .idle-timer { position: relative; z-index: 2; min-width: 5ch; margin-bottom: 0; padding: 7px 20px; color: white; background: #111; border: 6px solid white; font: 900 clamp(34px, 6vw, 78px)/1 Arial, sans-serif; box-shadow: 0 5px 0 #c8171d; isolation: isolate; }
+    .idle-timer::before, .idle-timer::after { content: ""; position: absolute; top: 50%; z-index: -1; width: clamp(74px, 10vw, 138px); height: 112%; opacity: 0; background: #ffed00; clip-path: polygon(0 42%, 35% 33%, 19% 0, 62% 29%, 100% 18%, 72% 48%, 100% 70%, 59% 62%, 38% 100%, 34% 64%, 0 76%, 24% 54%); filter: drop-shadow(0 0 6px #ff2b20) drop-shadow(0 0 13px #ff2b20); }
+    .idle-timer::before { right: calc(100% + 7px); transform: translateY(-50%); }
+    .idle-timer::after { left: calc(100% + 7px); transform: translateY(-50%) scaleX(-1); }
+    .idle-timer.is-urgent { color: white; background: #d10b16; border-color: #fff3b0; box-shadow: 0 6px 0 #5f0008, 0 0 24px #ff2b20; animation: urgentPulse .48s ease-in-out infinite; }
+    .idle-timer.is-urgent::before { opacity: 1; animation: rayLeft .32s steps(2, end) infinite; }
+    .idle-timer.is-urgent::after { opacity: 1; animation: rayRight .32s steps(2, end) infinite; }
     .roulette { width: min(70vw, 70vh, 720px); aspect-ratio: 1; border-radius: 50%; background: repeating-conic-gradient(from -3deg, #fff4a8 0 3deg, #b36b00 3deg 6deg); box-shadow: 0 18px 0 #261300, 0 24px 28px rgba(0,0,0,.65), inset 0 0 0 5px #fff2a0; }
     .roulette::before { content: ""; position: absolute; inset: 4%; z-index: 1; border: 5px solid #331400; border-radius: 50%; box-shadow: inset 0 0 0 4px #fff7c7, inset 0 0 24px rgba(0,0,0,.45); }
     .roulette::after { content: ""; position: absolute; top: -7%; left: 50%; z-index: 8; width: 13%; height: 20%; transform: translateX(-50%); clip-path: polygon(50% 100%, 0 0, 100% 0); background: linear-gradient(90deg, #8f0018, #ff3a30 48%, #8f0018 52%); filter: drop-shadow(0 6px 0 #240900); }
@@ -51,6 +57,9 @@
       100% { transform: rotate(calc(var(--wheel-end, 1800deg) * -1)); }
     }
     @keyframes pointerTick { to { transform: translateX(-50%) rotate(5deg); } }
+    @keyframes urgentPulse { 50% { transform: scale(1.09); filter: brightness(1.2); } }
+    @keyframes rayLeft { 50% { transform: translateY(-50%) scale(.88) translateX(-8px); opacity: .72; } }
+    @keyframes rayRight { 50% { transform: translateY(-50%) scaleX(-1) scale(.88) translateX(-8px); opacity: .72; } }
     @keyframes pop { 50% { transform: scale(1.08); } }
     @media (max-height: 600px) { .roulette { width: min(62vw, 68vh, 620px); } }
   </style>
@@ -114,7 +123,11 @@
       window.currentMultiplier = 1;
       show(idle);
       const endsAt = Date.now() + cycleDuration;
-      const updateTimer = () => { idleTimer.textContent = formatTime(endsAt - Date.now()); };
+      const updateTimer = () => {
+        const remaining = endsAt - Date.now();
+        idleTimer.textContent = formatTime(remaining);
+        idleTimer.classList.toggle("is-urgent", remaining > 0 && remaining <= 10000);
+      };
       updateTimer();
       ticker = setInterval(updateTimer, 250);
       finishTimer = setTimeout(triggerMultiplier, cycleDuration);
