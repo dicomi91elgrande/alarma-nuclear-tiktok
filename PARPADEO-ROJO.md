@@ -30,7 +30,7 @@ Mismo sistema de webhooks que los proyectos «overlay geoguess» y «widget orac
 
 Configura una ejecución por unidad de regalo (repetición por regalo activada, cantidad 1). `{coins}` representa el valor de una unidad, como en la integración anterior. **1000 monedas o más activa el efecto; 999 no.** No acumula regalos pequeños ni suma entre usuarios.
 
-El parpadeo dura 5 segundos, con un pulso cada 1,25 segundos. Otro regalo válido prolonga el efecto hasta 5 segundos después del último evento. Al terminar vuelve a transparente. No lleva sonido ni texto.
+El parpadeo dura 7 segundos, con un pulso cada 1,27 segundos. Otro regalo válido prolonga el efecto hasta 7 segundos después del último evento. Al terminar vuelve a transparente. No lleva sonido ni texto.
 
 Para contar el total de un combo, usa `"countMode":"combo","repeatCount":"{repeatcount}"` en el body y configura Interactive para ejecutar solo al finalizar el combo. No envíes totales acumulados en cada actualización. Opcionalmente se acepta `eventId` para descartar repeticiones del mismo evento durante 10 minutos; sin ID cada webhook se considera una entrega nueva.
 

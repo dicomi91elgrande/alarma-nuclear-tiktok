@@ -24,8 +24,8 @@ test('Webhook: límite inclusivo, combos, duplicados y datos inválidos', async 
     const reader = stream.body.getReader();
     const {value} = await reader.read();
     const state = JSON.parse(new TextDecoder().decode(value).split('data: ')[1]);
-    assert.ok(state.activeUntil > Date.now());
-    assert.ok(state.activeUntil <= Date.now()+5000);
+    assert.ok(state.activeUntil > Date.now()+6000);
+    assert.ok(state.activeUntil <= Date.now()+7000);
     await reader.cancel();
     const overlay = await fetch('http://127.0.0.1:13191/overlay');
     assert.equal(overlay.status,200);

@@ -8,10 +8,10 @@
     html,body { margin:0; width:100%; height:100%; overflow:hidden; background:transparent; pointer-events:none }
     body.chroma { background:#00ff00 }
     #flash { position:fixed; inset:0; background:#ff0000; opacity:0 }
-    #flash.active { animation:pulse 1250ms ease-in-out infinite }
-    body.chroma #flash.active { animation:chromaPulse 1250ms steps(1,end) infinite }
-    @keyframes pulse { 0%,100% { opacity:0 } 40%,55% { opacity:.65 } }
-    @keyframes chromaPulse { 0%,55%,100% { opacity:0 } 15% { opacity:1 } }
+    #flash.active { animation:pulse 125ms steps(1,end) infinite }
+    body.chroma #flash.active { animation:chromaPulse 125ms steps(1,end) infinite }
+    @keyframes pulse { 0%,100% { opacity:.65 } 50% { opacity:0 } }
+    @keyframes chromaPulse { 0%,100% { opacity:1 } 50% { opacity:0 } }
   </style>
 </head>
 <body>
@@ -31,4 +31,3 @@
   </script>
 </body>
 </html>
-

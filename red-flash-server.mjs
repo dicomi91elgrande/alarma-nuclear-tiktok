@@ -52,7 +52,7 @@ const server = http.createServer(async (req, res) => {
       if (!pending && !duplicate) {
         if (key) { seen.set(key, now); if (seen.size > 10000) seen.delete(seen.keys().next().value); }
         lastGift = { coins: coins * count, username: String(body.username || 'Usuario').slice(0, 100), triggered, time: now };
-        if (triggered) activeUntil = now + 5000;
+        if (triggered) activeUntil = now + 7000;
         publish();
       }
       res.setHeader('Content-Type', 'application/json');
@@ -65,5 +65,3 @@ const server = http.createServer(async (req, res) => {
 setInterval(() => { for (const res of clients) res.write(': heartbeat\n\n'); }, 15000).unref();
 server.on('error', error => { console.error(`No se pudo iniciar el overlay: ${error.message}`); process.exitCode = 1; });
 server.listen(port, cloud ? '0.0.0.0' : '127.0.0.1', () => console.log(`Panel: http://127.0.0.1:${port}\nOverlay: http://127.0.0.1:${port}/overlay (1080 x 1920)`));
-
-
