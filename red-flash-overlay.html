@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Parpadeo rojo · TikTok 1080 × 1920</title>
+  <style>
+    html,body { margin:0; width:100%; height:100%; overflow:hidden; background:transparent; pointer-events:none }
+    body.chroma { background:#00ff00 }
+    #flash { position:fixed; inset:0; background:#ff0000; opacity:0 }
+    #flash.active { animation:pulse 1250ms ease-in-out infinite }
+    body.chroma #flash.active { animation:chromaPulse 1250ms steps(1,end) infinite }
+    @keyframes pulse { 0%,100% { opacity:0 } 40%,55% { opacity:.65 } }
+    @keyframes chromaPulse { 0%,55%,100% { opacity:0 } 15% { opacity:1 } }
+  </style>
+</head>
+<body>
+  <div id="flash" aria-hidden="true"></div>
+  <script>
+    if (new URLSearchParams(location.search).get('chroma') === '1') document.body.classList.add('chroma');
+    const flash = document.getElementById('flash');
+    let timer;
+    const stream = new EventSource('/events' + location.search);
+    setInterval(() => fetch('/health', {cache:'no-store'}).catch(() => {}), 60000);
+    stream.onmessage = ({data}) => {
+      const remaining = JSON.parse(data).remaining;
+      clearTimeout(timer);
+      flash.classList.toggle('active', remaining > 0);
+      if (remaining > 0) timer = setTimeout(() => flash.classList.remove('active'), remaining);
+    };
+  </script>
+</body>
+</html>
+

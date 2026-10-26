@@ -1,5 +1,15 @@
 services:
   - type: web
+    runtime: node
+    name: parpadeo-rojo-tiktok
+    plan: free
+    buildCommand: node --check red-flash-server.mjs
+    startCommand: node red-flash-server.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: OVERLAY_TOKEN
+        generateValue: true
+  - type: web
     runtime: static
     name: alarma-nuclear-tiktok
     buildCommand: ""

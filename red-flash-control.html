@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Control · Parpadeo rojo</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;background:#101116;color:#f5f5f7;font:16px/1.6 system-ui;padding:40px 24px} main{max-width:1040px;margin:auto;display:grid;grid-template-columns:1fr 270px;gap:40px} h1{font-size:38px;line-height:1.15} .tag{color:#ff6868;font-weight:700;letter-spacing:2px} code{background:#252631;padding:5px 8px;border-radius:6px;overflow-wrap:anywhere} pre{white-space:pre-wrap;background:#252631;padding:16px;border-radius:12px} button,a{color:inherit} button{background:#b91c31;border:0;border-radius:8px;padding:12px 16px;margin:5px 5px 5px 0;font:inherit;cursor:pointer} iframe{width:270px;height:480px;border:1px solid #444;border-radius:12px;background:linear-gradient(145deg,#526273,#17222a)} small{color:#b8bac6} #status{color:#9be8b0} @media(max-width:750px){main{grid-template-columns:1fr}}
+  </style>
+</head>
+<body><main><section>
+  <div class="tag">TIKTOK LIVE · 9:16</div>
+  <h1>Una pantalla.<br>Todo rojo.</h1>
+  <p>Regalos de <strong>1000 monedas o más</strong> activan 5 segundos de pulsos rojos. Sin textos ni sonido en el overlay.</p>
+  <p id="status">Conectando con el servidor…</p>
+  <button data-coins="1000">Probar 1000 monedas</button><button data-coins="999">Probar límite: 999</button>
+  <p id="last">Esperando el primer regalo.</p>
+  <h2>Fuente de navegador</h2>
+  <p><a href="/overlay" target="_blank">Abrir overlay transparente</a> · <a href="/overlay?chroma=1" target="_blank">Abrir con fondo verde</a></p>
+  <p><code id="overlayUrl"></code></p>
+  <p>Tamaño: <strong>1080 × 1920</strong>. Coloca la fuente encima de las demás. Si usas fondo verde, aplica clave de color #00ff00.</p>
+  <h2>Conectar Interactive</h2>
+  <p>En el evento de regalos, añade una acción webhook <strong>POST</strong> con Content-Type <code>application/json</code>:</p>
+  <p><code id="webhookUrl"></code></p>
+  <pre>{"username":"{username}","coins":"{coins}","countMode":"unit"}</pre>
+  <p>Usa una ejecución por cada unidad de regalo (repetición por regalo activada, cantidad 1), como en tu integración anterior. No se suman regalos pequeños ni aportaciones de distintos usuarios.</p>
+  <small>La vista de la derecha es una prueba del mismo overlay. Los botones también activan cualquier fuente abierta. Mantén el servidor en marcha durante el directo.</small>
+</section><aside><iframe src="/overlay" title="Vista previa vertical"></iframe><p><small>Vista previa · 1080 × 1920</small></p></aside></main>
+<script>
+  document.querySelector('iframe').src = '/overlay' + location.search;
+  document.querySelectorAll('a').forEach(a => { const url = new URL(a.href); new URLSearchParams(location.search).forEach((v,k) => url.searchParams.set(k,v)); a.href=url; });
+  document.getElementById('overlayUrl').textContent = location.origin + '/overlay' + location.search;
+  document.getElementById('webhookUrl').textContent = location.origin + '/interactive/gift' + location.search;
+  const status = document.getElementById('status'), last = document.getElementById('last');
+  const events = new EventSource('/events' + location.search);
+  events.onmessage = ({data}) => {
+    status.textContent = 'Servidor conectado · esperando Interactive';
+    const gift = JSON.parse(data).lastGift;
+    if (gift) last.textContent = `${gift.username}: ${gift.coins} monedas · ${gift.triggered ? 'Parpadeo activado' : 'No llega a 1000 monedas'}`;
+  };
+  events.onerror = () => status.textContent = 'Sin conexión · inicia INICIAR-PARPADEO.cmd';
+  document.querySelectorAll('button[data-coins]').forEach(button => button.onclick = async () => {
+    try {
+      const res = await fetch('/interactive/gift' + location.search, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'Prueba',coins:Number(button.dataset.coins),countMode:'unit'})});
+      if (!res.ok) throw new Error();
+    } catch { status.textContent = 'No se pudo enviar la prueba. Comprueba el servidor.'; }
+  });
+</script>
+</body></html>
+
+
