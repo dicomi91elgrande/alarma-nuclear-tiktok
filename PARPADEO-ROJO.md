@@ -1,5 +1,15 @@
 # Parpadeo rojo con Interactive
 
+## Render (uso habitual)
+
+Servicio: https://parpadeo-rojo-tiktok.onrender.com
+
+Usa el enlace privado del overlay facilitado en el chat (`/overlay?key=...`) como fuente de navegador de 1080 × 1920. La clave se guarda en `OVERLAY_TOKEN` en Render y nunca en Git. Interactive envía POST a `/interactive/gift?key=...` con `{"coins":"{coins}","countMode":"unit"}`. No necesita enviar nombres ni fotos.
+
+Abre TikTok Studio y conecta Interactive con el perfil donde está la acción. No necesitas iniciar ningún servidor local. La primera carga del plan gratuito puede tardar alrededor de un minuto; después la fuente comprueba el servicio cada 60 segundos mientras permanece abierta. El servicio también reconecta automáticamente si pierde la conexión.
+
+## Alternativa local
+
 1. Abre `INICIAR-PARPADEO.cmd`. Requiere Node.js (ya instalado en este equipo).
 2. El panel se abre en http://127.0.0.1:3191 y permite probarlo.
 3. Añade una fuente de navegador con http://127.0.0.1:3191/overlay y tamaño **1080 × 1920** encima del resto de fuentes.

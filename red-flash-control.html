@@ -22,9 +22,9 @@
   <h2>Conectar Interactive</h2>
   <p>En el evento de regalos, añade una acción webhook <strong>POST</strong> con Content-Type <code>application/json</code>:</p>
   <p><code id="webhookUrl"></code></p>
-  <pre>{"username":"{username}","coins":"{coins}","countMode":"unit"}</pre>
+  <pre>{"coins":"{coins}","countMode":"unit"}</pre>
   <p>Usa una ejecución por cada unidad de regalo (repetición por regalo activada, cantidad 1), como en tu integración anterior. No se suman regalos pequeños ni aportaciones de distintos usuarios.</p>
-  <small>La vista de la derecha es una prueba del mismo overlay. Los botones también activan cualquier fuente abierta. Mantén el servidor en marcha durante el directo.</small>
+  <small>La vista de la derecha es una prueba del mismo overlay. Los botones también activan cualquier fuente abierta. En Render no necesitas arrancar nada en el ordenador. Abre la fuente un minuto antes del directo si el servicio estaba inactivo.</small>
 </section><aside><iframe src="/overlay" title="Vista previa vertical"></iframe><p><small>Vista previa · 1080 × 1920</small></p></aside></main>
 <script>
   document.querySelector('iframe').src = '/overlay' + location.search;
@@ -38,7 +38,7 @@
     const gift = JSON.parse(data).lastGift;
     if (gift) last.textContent = `${gift.username}: ${gift.coins} monedas · ${gift.triggered ? 'Parpadeo activado' : 'No llega a 1000 monedas'}`;
   };
-  events.onerror = () => status.textContent = 'Sin conexión · inicia INICIAR-PARPADEO.cmd';
+  events.onerror = () => status.textContent = 'Reconectando con el servidor…';
   document.querySelectorAll('button[data-coins]').forEach(button => button.onclick = async () => {
     try {
       const res = await fetch('/interactive/gift' + location.search, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'Prueba',coins:Number(button.dataset.coins),countMode:'unit'})});
@@ -47,5 +47,6 @@
   });
 </script>
 </body></html>
+
 
 
